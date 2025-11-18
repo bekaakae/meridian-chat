@@ -63,7 +63,15 @@ const io = new Server(httpServer, {
     credentials: true
   },
   // Add these for production
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  cookie: false
+});
+
+// Handle Socket.IO connection errors
+io.engine.on("connection_error", (err) => {
+  console.log('Socket.IO connection error:', err);
 });
 
 // CORS middleware
