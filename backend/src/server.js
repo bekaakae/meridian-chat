@@ -44,7 +44,11 @@ connectDB().catch(err => {
   process.exit(1);
 });
 
-const allowedOrigins = [
+const allowedOrigins = process.env.NODE_ENV === 'production'?
+[
+  'https://meridian-chat-k8v8.vercel.app',
+  // Add your production frontend URL here
+] : [
   'http://localhost:3001', 
   'http://localhost:3002',
   'http://localhost:5173', 
@@ -53,9 +57,13 @@ const allowedOrigins = [
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://your-frontend-app.vercel.app']
+      : ['http://localhost:3001', 'http://localhost:3000'],
     credentials: true
-  }
+  },
+  // Add these for production
+  transports: ['websocket', 'polling']
 });
 
 // CORS middleware
@@ -105,6 +113,14 @@ app.get("/api/health", (req, res) => {
   res.json({ 
     status: "OK", 
     message: "Server is healthy",
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "OK", 
+    message: "Server is running",
     timestamp: new Date().toISOString()
   });
 });
